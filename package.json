@@ -9,12 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "mongoose": "^7.0.3",
     "next": "13.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"
- },
+  },
   "devDependencies": {
-     "@types/node": "18.15.9",
+    "@types/node": "18.15.9",
     "@types/react": "18.0.29",
     "@types/react-dom": "18.0.11",
     "eslint": "8.36.0",
