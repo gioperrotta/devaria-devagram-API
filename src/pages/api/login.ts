@@ -1,18 +1,37 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { mongodbConnection } from '@/middlewares/MongodbConnection';
+import { mongodbConnection } from '@/middlewares/mongodbConnection';
 import { StandardResponse } from '@/types/StandardResponse';
+import { LoginResponse } from '@/types/LoginResponse';
 
+import { UserModel } from '@/models/UserModel';
+import md5 from 'md5';
+import jwt from 'jsonwebtoken';
 
-const loginRoute = (req: NextApiRequest, res: NextApiResponse<StandardResponse>) => {
+const loginEndPoint = async (
+  req: NextApiRequest,
+  res: NextApiResponse<StandardResponse | LoginResponse>
+) => {
+
+  const { JWT_SECRET_KEY } = process.env;
+  if (!JWT_SECRET_KEY) {
+    return res.status(500).json({ error: 'Env JWT_KEY não informado' })
+  }
+
   if (req.method === 'POST') {
-    const { login, senha } = req.body
+    const { email, senha } = req.body;
 
-    if (login === 'admin@admin.com' && senha === '123') {
-      return res.status(200).json({ msg: 'Usuário autenticado com sucesso' })
-    } return res.status(405).json({ error: 'Usuário ou senha não encontrados' })
-
+    const userExists = await UserModel.findOne({ email, senha: md5(senha) })
+    if (!userExists) {
+      return res.status(405).json({ error: 'Usuário ou senha não encontrados' })
+    }
+    const token = jwt.sign({_id: userExists._id} , JWT_SECRET_KEY)
+    return res.status(200).json({
+      nome: userExists.nome, 
+      email: userExists.email, 
+      token 
+    })
   }
   return res.status(405).json({ error: 'Metodo Informado não é válido' })
 }
 
-export default mongodbConnection(loginRoute)
+export default mongodbConnection(loginEndPoint)
