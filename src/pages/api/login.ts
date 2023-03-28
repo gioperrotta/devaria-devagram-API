@@ -35,3 +35,4 @@ const loginEndPoint = async (
 }
 
 export default mongodbConnection(loginEndPoint)
+

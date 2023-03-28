@@ -1,15 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { StandardResponse } from '@/types/StandardResponse';
-import { UserRequest } from "@/types/UserRequest";
-import { mongodbConnection } from "@/middlewares/mongodbConnection";
-import { UserModel } from "@/models/UserModel";
+import { UserRequest } from '@/types/UserRequest';
+import { mongodbConnection } from '@/middlewares/mongodbConnection';
+import { UserModel } from '@/models/UserModel';
 import md5 from 'md5';
+import { upload, uploadImageCosmic } from '@/services/uploadImageCosmic';
+import nc from 'next-connect';
 
-const usersEndPoint = async (
-  req: NextApiRequest,
-  res: NextApiResponse<StandardResponse>
-) => {
-  if (req.method === 'POST') {
+const handler = nc()
+  .use(upload.single('file'))
+  .post(async (req: NextApiRequest, res: NextApiResponse<StandardResponse>) => {
+
     const user = req.body as UserRequest;
 
     if (!user.nome || user.nome.length < 2) {
@@ -25,20 +26,28 @@ const usersEndPoint = async (
     if (!user.senha || user.senha.length < 4) {
       return res.status(400).json({ error: 'Senah inválida' });
     }
-    const userExists = UserModel.find({email: user.email})
-    if (!!userExists) {
+
+     const userExists = await UserModel.findOne({ email: user.email })
+     if (!!userExists) {
       return res.status(400).json({ error: 'Já existe uma conta com este e-mail' });
-    }
+     }
+    // enviar a imagem do multer para o cosmic
+    const image = await uploadImageCosmic(req)
+
     const userToCreate = {
       nome: user.nome,
       email: user.email,
-      senha: md5(user.senha)
+      senha: md5(user.senha),
+      avatar: image?.media.url
     }
     await UserModel.create(userToCreate);
     return res.status(200).json({ error: 'Usuário cadstrado com sucesso' });
+  })
+
+export const config = {
+  api: {
+    bodyParser: false
   }
-  
-  return res.status(405).json({ error: 'Metodo Informado não é válido' });
 }
 
-export default mongodbConnection(usersEndPoint);
+export default mongodbConnection(handler);
