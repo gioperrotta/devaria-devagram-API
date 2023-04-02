@@ -1,12 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import type { StandardResponse } from '@/types/StandardResponse';
+
 import nc from 'next-connect';
 
+import { politicaCORS } from '@/middlewares/politicaCORS';
 import { validateJWTtoken } from '@/middlewares/validateJWTtoken';
 import { mongodbConnection } from '@/middlewares/mongodbConnection';
 
-import type { StandardResponse } from '@/types/StandardResponse';
 import { UserModel } from '@/models/UserModel';
-
 
 const handler = nc()
   .get(async (
@@ -44,4 +45,4 @@ const handler = nc()
 
   })
 
-export default validateJWTtoken(mongodbConnection(handler));
+export default politicaCORS(validateJWTtoken(mongodbConnection(handler)));

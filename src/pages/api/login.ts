@@ -1,11 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { mongodbConnection } from '@/middlewares/mongodbConnection';
-import { StandardResponse } from '@/types/StandardResponse';
-import { LoginResponse } from '@/types/LoginResponse';
+import type { StandardResponse } from '@/types/StandardResponse';
+import type { LoginResponse } from '@/types/LoginResponse';
 
-import { UserModel } from '@/models/UserModel';
 import md5 from 'md5';
 import jwt from 'jsonwebtoken';
+
+import { politicaCORS } from '@/middlewares/politicaCORS';
+import { mongodbConnection } from '@/middlewares/mongodbConnection';
+
+import { UserModel } from '@/models/UserModel';
 
 const loginEndPoint = async (
   req: NextApiRequest,
@@ -34,5 +37,5 @@ const loginEndPoint = async (
   return res.status(405).json({ error: 'Metodo Informado não é válido' })
 }
 
-export default mongodbConnection(loginEndPoint)
+export default politicaCORS(mongodbConnection(loginEndPoint));
 

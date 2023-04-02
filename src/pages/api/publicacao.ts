@@ -1,9 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { StandardResponse } from '@/types/StandardResponse';
 import nc from 'next-connect';
-import { upload, uploadImageCosmic } from '@/services/uploadImageCosmic';
-import { mongodbConnection } from '@/middlewares/mongodbConnection';
+
+import { politicaCORS } from '@/middlewares/politicaCORS';
 import { validateJWTtoken } from '@/middlewares/validateJWTtoken';
+import { mongodbConnection } from '@/middlewares/mongodbConnection';
+
+import { upload, uploadImageCosmic } from '@/services/uploadImageCosmic';
+
 import { UserModel } from '@/models/UserModel';
 import { PublicacaoModel } from '@/models/PublicacaoModel';
 
@@ -57,6 +61,6 @@ export const config = {
   }
 }
 
-export default validateJWTtoken(mongodbConnection(handler))
+export default politicaCORS(validateJWTtoken(mongodbConnection(handler)));
 
 

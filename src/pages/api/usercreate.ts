@@ -1,11 +1,15 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import nc from 'next-connect';
+import md5 from 'md5';
+
 import { StandardResponse } from '@/types/StandardResponse';
 import { UserRequest } from '@/types/UserRequest';
+
 import { mongodbConnection } from '@/middlewares/mongodbConnection';
+import { politicaCORS } from "@/middlewares/politicaCORS";
+
 import { UserModel } from '@/models/UserModel';
-import md5 from 'md5';
 import { upload, uploadImageCosmic } from '@/services/uploadImageCosmic';
-import nc from 'next-connect';
 
 const handler = nc()
   .use(upload.single('file'))
@@ -44,10 +48,10 @@ const handler = nc()
     return res.status(200).json({ error: 'Usuário cadstrado com sucesso' });
   })
 
-export const config = {
-  api: {
-    bodyParser: false
+  export const config = {
+    api: {
+      bodyParser: false
+    }
   }
-}
 
-export default mongodbConnection(handler);
+export default politicaCORS(mongodbConnection(handler));
